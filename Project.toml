@@ -1,0 +1,10 @@
+[deps]
+AllenBrain = "0a79a13e-b89b-5a1e-b6bf-ef7ebeca6040"
+AllenSDK = "9d22b198-c11d-497b-9ac7-6add78eade21"
+CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
+GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
+HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
+NRRD = "9bb6cfbd-7763-5393-b1b5-1c8e09872146"
+PythonCall = "6099a3de-0909-46bc-b1f4-468b9a2dfc0d"
