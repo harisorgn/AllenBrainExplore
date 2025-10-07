@@ -121,8 +121,8 @@ rspc = rsp.ReferenceSpaceCache(resolution, "annotation/ccf_2017", manifest="mani
 S_lh = get_structure_mask(rspc, lh["id"])
 S_vta = get_structure_mask(rspc, vta["id"])
 
-X = download_projection_density(experiment_id[idx], "proj_dens", resolution)
+X = download_projection_density(experiment_ids[idx], "proj_dens", resolution)
 
-Y = download_injection_density(experiment_id[idx], "inj_dens", resolution)
+Y = download_injection_density(experiment_ids[idx], "inj_dens", resolution)
 
 plot_connection_density(X.data, Y.data, S_lh, S_vta; source="LHb", destination="VTA", hemisphere=hemisphere_ids[idx])
