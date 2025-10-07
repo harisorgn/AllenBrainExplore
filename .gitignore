@@ -1,2 +1,6 @@
 Manifest.toml
 /.CondaPkg
+/annotation
+/mouse_connectivity
+*.nrrd
+*.json
