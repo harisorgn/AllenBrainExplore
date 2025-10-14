@@ -2,21 +2,26 @@ using AllenSDK
 using PythonCall
 using DataFrames
 
+using AxisArrays: AxisArray
+
 using HTTP
 using FileIO
 
 using GLMakie
 
+get_data(X::AbstractArray) = X
+get_data(X::AxisArray) = X.data
+
 function download_projection_density(id, filename, resolution)
     download("http://api.brain-map.org/grid_data/download_file/$(id)??image=projection_density&resolution=$(resolution)", filename * ".nrrd")
 
-    return pyconvert(AbstractArray{Float64}, load("$(filename).nrrd"))
+    return get_data(pyconvert(AbstractArray{Float64}, load("$(filename).nrrd")))
 end
 
 function download_injection_density(id, filename, resolution)
     download("http://api.brain-map.org/grid_data/download_file/$(id)??image=injection_density&resolution=$(resolution)", filename * ".nrrd")
 
-    return pyconvert(AbstractArray{Float64}, load("$(filename).nrrd"))
+    return get_data(pyconvert(AbstractArray{Float64}, load("$(filename).nrrd")))
 end
 
 function get_structure_mask(rspc, id)
@@ -28,7 +33,6 @@ function get_structure_mask(rspc, id)
 end
 
 function connection_density!(gridpos, D, MASK; title="", hemisphere=2)
-        
     X = copy(D)
     X[.!(MASK)] .= zero(eltype(X))
 
@@ -125,4 +129,4 @@ X = download_projection_density(experiment_ids[idx], "proj_dens", resolution)
 
 Y = download_injection_density(experiment_ids[idx], "inj_dens", resolution)
 
-plot_connection_density(X.data, Y.data, S_lh, S_vta; source="LHb", destination="VTA", hemisphere=hemisphere_ids[idx])
+plot_connection_density(X, Y, S_lh, S_vta; source="LHb", destination="VTA", hemisphere=hemisphere_ids[idx])

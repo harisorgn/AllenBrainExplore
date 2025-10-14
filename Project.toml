@@ -1,6 +1,8 @@
 [deps]
 AllenSDK = "9d22b198-c11d-497b-9ac7-6add78eade21"
+AxisArrays = "39de3d68-74b9-583c-8d2d-e117c070f3a9"
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+CondaPkg = "992eb4ea-22a4-4c89-a5bb-47a3300528ab"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
