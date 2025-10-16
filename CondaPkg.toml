@@ -1,0 +1,3 @@
+
+[pip.deps]
+abc-atlas-access = "@git+https://github.com/AllenInstitute/abc_atlas_access.git"
