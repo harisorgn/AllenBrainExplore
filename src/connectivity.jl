@@ -1,16 +1,3 @@
-using AllenSDK
-using PythonCall
-using DataFrames
-
-using AxisArrays: AxisArray
-
-using HTTP
-using FileIO
-
-using GLMakie
-
-include("utils.jl")
-
 get_data(X::AbstractArray) = X
 get_data(X::AxisArray) = X.data
 
@@ -115,37 +102,37 @@ function plot_connection_density(S, D, S_mask, D_mask; source="", destination=""
     fig
 end
 
-resolution = 50
+function plot_connection_density(source::String, destination::String; resolution=50, N_experiments=1)
+    mouse_conn = pyimport("allensdk.core.mouse_connectivity_cache")
+    mcc = mouse_conn.MouseConnectivityCache()
+    struct_tree = mcc.get_structure_tree()
 
-mouse_conn = pyimport("allensdk.core.mouse_connectivity_cache")
-mcc = mouse_conn.MouseConnectivityCache()
-struct_tree = mcc.get_structure_tree()
+    lh = pyconvert(Dict, struct_tree.get_structures_by_acronym([source])[0])
+    lh_experiments = pyconvert(AbstractArray{Dict}, mcc.get_experiments(injection_structure_ids=[lh["id"]]))
+    lh_experiments = DataFrame(lh_experiments)
 
-lh = pyconvert(Dict, struct_tree.get_structures_by_acronym(["LH"])[0])
-lh_experiments = pyconvert(AbstractArray{Dict}, mcc.get_experiments(injection_structure_ids=[lh["id"]]))
-lh_experiments = DataFrame(lh_experiments)
+    vta = pyconvert(Dict, struct_tree.get_structures_by_acronym([destination])[0])
 
-vta = pyconvert(Dict, struct_tree.get_structures_by_acronym(["VTA"])[0])
+    pandas_df = mcc.get_structure_unionizes(
+        lh_experiments.id, 
+        is_injection=false,
+        structure_ids=[vta["id"]],
+        include_descendants=true
+    )
+    df = to_dataframe(pandas_df)
+    sort!(df, :projection_density, rev=true)
 
-pandas_df = mcc.get_structure_unionizes(
-    lh_experiments.id, 
-    is_injection=false,
-    structure_ids=[vta["id"]],
-    include_descendants=true
-)
-df = to_dataframe(pandas_df)
-sort!(df, :projection_density, rev=true)
+    rsp = pyimport("allensdk.core.reference_space_cache")
+    rspc = rsp.ReferenceSpaceCache(resolution, "annotation/ccf_2017", manifest="manifest.json")
 
-rsp = pyimport("allensdk.core.reference_space_cache")
-rspc = rsp.ReferenceSpaceCache(resolution, "annotation/ccf_2017", manifest="manifest.json")
+    S_lh = get_structure_mask(rspc, lh["id"])
+    S_vta = get_structure_mask(rspc, vta["id"])
 
-S_lh = get_structure_mask(rspc, lh["id"])
-S_vta = get_structure_mask(rspc, vta["id"])
+    X = [download_projection_density(exp_id, "proj_dens", resolution) for exp_id in df.experiment_id[1:N_experiments]]
 
-N_plots = 5
+    Y = [download_injection_density(exp_id, "inj_dens", resolution) for exp_id in df.experiment_id[1:N_experiments]]
 
-X = [download_projection_density(exp_id, "proj_dens", resolution) for exp_id in df.experiment_id[1:N_plots]]
+    fig = plot_connection_density(X, Y, S_lh, S_vta; source="LHb", destination="VTA", hemisphere=df.hemisphere_id[1:N_experiments])
 
-Y = [download_injection_density(exp_id, "inj_dens", resolution) for exp_id in df.experiment_id[1:N_plots]]
-
-plot_connection_density(X, Y, S_lh, S_vta; source="LHb", destination="VTA", hemisphere=df.hemisphere_id[1:N_plots])
+    return fig
+end
