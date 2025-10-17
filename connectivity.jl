@@ -9,6 +9,8 @@ using FileIO
 
 using GLMakie
 
+include("utils.jl")
+
 get_data(X::AbstractArray) = X
 get_data(X::AxisArray) = X.data
 
@@ -79,17 +81,36 @@ function connection_density!(gridpos, D, MASK; title="", hemisphere=2)
     scatter!(ax, points_region; color=(:grey, 0.1))
 end
 
-function plot_connection_density(S, D, S_mask, D_mask; source="", destination="", hemisphere=2)
+function plot_connection_density(S, D, S_mask, D_mask; source="", destination="", hemisphere=[1])
     
+    N_experiments = length(S)
+
     fig = Figure()
-    ga = fig[1, 1] = GridLayout()
-    gb = fig[1, 2] = GridLayout()
-    gc = fig[1, 3] = GridLayout()
 
-    connection_density!(ga, S, S_mask; hemisphere, title="$source [Source]")
-    connection_density!(gb, D, D_mask; hemisphere, title="$destination [Destination]")
+    for i in Base.OneTo(N_experiments)
+        g_src = fig[1, i] = GridLayout()
+        g_dst = fig[2, i] = GridLayout()
+        
+        S_exp = @views S[i]
+        D_exp = @views D[i]
 
-    Colorbar(gc[1,1]; limits=(0, 1), ticks=0:0.1:1, label="Density")
+        connection_density!(g_src[1,1], S_exp, S_mask; hemisphere=hemisphere[i])
+        connection_density!(g_dst[1,1], D_exp, D_mask; hemisphere=hemisphere[i])
+
+        Label(fig[0, i], text = "Experiment $i", fontsize=20)
+        colsize!(fig.layout, i, Relative(1/(N_experiments+1)))
+    end
+
+    Colorbar(fig[1:2, N_experiments+1]; limits=(0, 1), ticks=0:0.1:1, label="Density")
+
+    Label(fig[1,0], text = "$source [Source]", rotation=pi/2, fontsize=20)
+    Label(fig[2,0], text = "$destination [Destination]", rotation=pi/2, fontsize=20)
+
+    rowsize!(fig.layout, 1, Relative(1/2))
+    rowsize!(fig.layout, 2, Relative(1/2))
+    
+    #rowgap!(fig.layout, 1, Relative(0.001))
+    #colgap!(fig.layout, 2, Relative(0.001))
 
     fig
 end
@@ -112,12 +133,8 @@ pandas_df = mcc.get_structure_unionizes(
     structure_ids=[vta["id"]],
     include_descendants=true
 )
-
-experiment_ids = pyconvert(Vector{Int}, pandas_df["experiment_id"])
-hemisphere_ids = pyconvert(Vector{Int}, pandas_df["hemisphere_id"])
-vals_dens = pyconvert(Vector{Float64}, pandas_df["projection_density"])
-
-idx = argmax(vals_dens)
+df = to_dataframe(pandas_df)
+sort!(df, :projection_density, rev=true)
 
 rsp = pyimport("allensdk.core.reference_space_cache")
 rspc = rsp.ReferenceSpaceCache(resolution, "annotation/ccf_2017", manifest="manifest.json")
@@ -125,8 +142,10 @@ rspc = rsp.ReferenceSpaceCache(resolution, "annotation/ccf_2017", manifest="mani
 S_lh = get_structure_mask(rspc, lh["id"])
 S_vta = get_structure_mask(rspc, vta["id"])
 
-X = download_projection_density(experiment_ids[idx], "proj_dens", resolution)
+N_plots = 5
 
-Y = download_injection_density(experiment_ids[idx], "inj_dens", resolution)
+X = [download_projection_density(exp_id, "proj_dens", resolution) for exp_id in df.experiment_id[1:N_plots]]
 
-plot_connection_density(X, Y, S_lh, S_vta; source="LHb", destination="VTA", hemisphere=hemisphere_ids[idx])
+Y = [download_injection_density(exp_id, "inj_dens", resolution) for exp_id in df.experiment_id[1:N_plots]]
+
+plot_connection_density(X, Y, S_lh, S_vta; source="LHb", destination="VTA", hemisphere=df.hemisphere_id[1:N_plots])
