@@ -18,7 +18,9 @@ using GLMakie
 include("utils.jl")
 include("connectivity.jl")
 include("cell_types.jl")
+include("genes.jl")
 
 export plot_connection_density
+export get_expression_matrix
 
 end
