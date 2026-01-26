@@ -1,16 +1,28 @@
 name = "AllenBrainExplore"
 uuid = "9a4b6bc4-283a-40c4-ab6c-17fe1d622d86"
-authors = ["harisorgn <organtzh@gmail.com>"]
 version = "0.1.0"
+authors = ["harisorgn <organtzh@gmail.com>"]
 
 [deps]
 AllenSDK = "9d22b198-c11d-497b-9ac7-6add78eade21"
 AxisArrays = "39de3d68-74b9-583c-8d2d-e117c070f3a9"
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 CondaPkg = "992eb4ea-22a4-4c89-a5bb-47a3300528ab"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
 HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
+Muon = "446846d7-b4ce-489d-bf74-72da18fe3629"
 NRRD = "9bb6cfbd-7763-5393-b1b5-1c8e09872146"
+OhMyThreads = "67456a42-1dca-4109-a031-0a68de7e3ad5"
 PythonCall = "6099a3de-0909-46bc-b1f4-468b9a2dfc0d"
+
+[sources]
+DataFrames = {path = "C:\\Users\\organ\\.julia\\dev\\DataFrames"}
+Muon = {rev = "main", url = "https://github.com/scverse/Muon.jl.git"}
+
+[compat]
+CSV = "0.10.15"
+Muon = "0.2.1"
+OhMyThreads = "0.8.5"
