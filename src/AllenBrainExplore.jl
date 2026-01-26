@@ -8,6 +8,7 @@ using Muon
 
 using OhMyThreads
 
+using SparseArrays
 using AxisArrays: AxisArray
 
 using HTTP

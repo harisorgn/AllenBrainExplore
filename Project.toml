@@ -17,6 +17,7 @@ Muon = "446846d7-b4ce-489d-bf74-72da18fe3629"
 NRRD = "9bb6cfbd-7763-5393-b1b5-1c8e09872146"
 OhMyThreads = "67456a42-1dca-4109-a031-0a68de7e3ad5"
 PythonCall = "6099a3de-0909-46bc-b1f4-468b9a2dfc0d"
+SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [sources]
 DataFrames = {path = "C:\\Users\\organ\\.julia\\dev\\DataFrames"}
@@ -26,3 +27,4 @@ Muon = {rev = "main", url = "https://github.com/scverse/Muon.jl.git"}
 CSV = "0.10.15"
 Muon = "0.2.1"
 OhMyThreads = "0.8.5"
+SparseArrays = "1.12.0"
