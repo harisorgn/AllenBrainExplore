@@ -28,6 +28,10 @@ function get_expression_matrix(dataset_name, region)
     df_parcel = to_dataframe(parcellation_annotation)
 
     parcel_idxs = df_parcel[df_parcel.structure .== region, :parcellation_index]
+    if isempty(parcel_idxs)
+        parcel_idxs = df_parcel[df_parcel.substructure .== region, :parcellation_index]
+    end
+    
     ccf_idxs = findall(idx -> idx in parcel_idxs, df_ccf.parcellation_index)
     region_labels = df_ccf[ccf_idxs, :cell_label]
 
