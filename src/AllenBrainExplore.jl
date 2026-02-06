@@ -22,6 +22,6 @@ include("cell_types.jl")
 include("genes.jl")
 
 export plot_connection_density
-export get_expression_matrix
+export get_expression_matrix, get_gene_description
 
 end

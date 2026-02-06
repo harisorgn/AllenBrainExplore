@@ -60,3 +60,18 @@ function get_expression_matrix(dataset_name, region)
     return df
 end
 
+function get_gene_description(dataset_name, region)
+    abcpc = pyimport("abc_atlas_access.abc_atlas_cache.abc_project_cache")
+    pc = abcpc.AbcProjectCache
+    abc_cache = pc.from_cache_dir("./data/abc_atlas/")
+
+    dn = occursin("imputed", dataset_name) ? join(split(dataset_name, "-")[1:end-1], "-") : dataset_name
+
+    cell_metadata = abc_cache.get_metadata_dataframe(directory=dn, file_name="cell_metadata")
+    df_cell = to_dataframe(cell_metadata)
+
+    gene = abc_cache.get_metadata_dataframe(directory=dataset_name, file_name="gene")
+    df_gene = to_dataframe(gene)
+
+    return df_gene[!, [:gene_symbol, :name]]
+end
