@@ -8,8 +8,9 @@ using Muon
 
 using OhMyThreads
 
-using SparseArrays
+using SparseArrays: SparseMatrixCSC
 using AxisArrays: AxisArray
+using LinearAlgebra: Adjoint
 
 using HTTP
 using FileIO

@@ -46,17 +46,13 @@ function get_expression_matrix(dataset_name, region)
     file = join([pyconvert(String, p) for p in file.parts], "/")
 
     adata = readh5ad(file)
+    # HACK: Type conversion is necessary because the original type contains Int32 instead of Int(64)
+    # and some type assertions in Tables fail when converting AnnData to DataFrame.
+    adata.X = convert(Adjoint{Float64, SparseMatrixCSC{Float64, Int}}, adata.X)
+
     df = DataFrame(adata[cell_idxs, :])
     rename!(df, vcat(["obs"], lowercase.(df_gene.gene_symbol)))
 
-    # HACK: Type conversion is necessary because the original type contains Int32 instead of Int(64)
-    # and some type assertions in Tables fail.
-    for gene_name in names(df)
-        if !occursin("obs", gene_name)
-            df[!, gene_name] = convert(SparseArrays.SparseVector{Float64, Int}, df[:, gene_name])
-        end
-    end
-    
     return df
 end
 

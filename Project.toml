@@ -13,6 +13,7 @@ DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
 HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Muon = "446846d7-b4ce-489d-bf74-72da18fe3629"
 NRRD = "9bb6cfbd-7763-5393-b1b5-1c8e09872146"
 OhMyThreads = "67456a42-1dca-4109-a031-0a68de7e3ad5"
@@ -20,11 +21,12 @@ PythonCall = "6099a3de-0909-46bc-b1f4-468b9a2dfc0d"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [sources]
-DataFrames = {path = "C:\\Users\\organ\\.julia\\dev\\DataFrames"}
 Muon = {rev = "main", url = "https://github.com/scverse/Muon.jl.git"}
 
 [compat]
 CSV = "0.10.15"
+DataFrames = "1.8.1"
+LinearAlgebra = "1.12.0"
 Muon = "0.2.1"
 OhMyThreads = "0.8.5"
 SparseArrays = "1.12.0"
