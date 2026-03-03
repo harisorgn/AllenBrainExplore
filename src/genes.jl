@@ -11,12 +11,16 @@ function get_expression_matrix(dataset_name, region)
     gene = abc_cache.get_metadata_dataframe(directory=dataset_name, file_name="gene")
     df_gene = to_dataframe(gene)
 
-    #cluster_details = abc_cache.get_metadata_dataframe(
-    #    directory="WMB-taxonomy",
-    #    file_name="cluster_to_cluster_annotation_membership_pivoted",
-    #    keep_default_na=false
-    #)
-    #df_cluster = to_dataframe(cluster_details)
+    cluster_details = abc_cache.get_metadata_dataframe(
+        directory="WMB-taxonomy",
+        file_name="cluster_to_cluster_annotation_membership_pivoted",
+        keep_default_na=false
+    )
+    df_cluster = to_dataframe(cluster_details)
+
+    neuron_idxs = (.!occursin.("astro", lowercase.(df_cluster.class))) .& (.!occursin.("opc", lowercase.(df_cluster.class))) .& (.!occursin.("vascular", lowercase.(df_cluster.class))) .& (.!occursin.("immune", lowercase.(df_cluster.class)))
+    neuron_cluster_alias = df_cluster.cluster_alias[neuron_idxs]
+    filter!(r -> r.cluster_alias in neuron_cluster_alias, df_cell)
 
     ccf_coordinates = abc_cache.get_metadata_dataframe(directory="$(dn)-CCF", file_name="ccf_coordinates")
     df_ccf = to_dataframe(ccf_coordinates)
@@ -38,6 +42,10 @@ function get_expression_matrix(dataset_name, region)
     cell_idxs = tmap(region_labels) do l
         findfirst(x -> occursin(l, x), df_cell.cell_label)
     end
+    filter!(!isnothing, cell_idxs)
+    # explicitly cast Int to change from Vector{Union{Int, Nothing}} to Vector{Int} so that indexing adata doesn't error
+    cell_idxs = Int.(cell_idxs) 
+
     @show length(cell_idxs)
 
     expr_mat_file_name = occursin("MERFISH", dataset_name) ? join(split(dataset_name, "-")[2:end], "-") : dataset_name
@@ -48,10 +56,10 @@ function get_expression_matrix(dataset_name, region)
     adata = readh5ad(file)
     # HACK: Type conversion is necessary because the original type contains Int32 instead of Int(64)
     # and some type assertions in Tables fail when converting AnnData to DataFrame.
-    adata.X = convert(Adjoint{Float64, SparseMatrixCSC{Float64, Int}}, adata.X)
+    #adata.X = convert(Adjoint{Float64, SparseMatrixCSC{Float64, Int}}, adata.X)
 
     df = DataFrame(adata[cell_idxs, :])
-    rename!(df, vcat(["obs"], lowercase.(df_gene.gene_symbol)))
+    rename!(df, vcat(["obs"], lowercase.(df_gene.gene_symbol));  makeunique=true)
 
     return df
 end
