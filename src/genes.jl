@@ -35,18 +35,9 @@ function get_expression_matrix(dataset_name, region)
     if isempty(parcel_idxs)
         parcel_idxs = df_parcel[df_parcel.substructure .== region, :parcellation_index]
     end
-    
+
     ccf_idxs = findall(idx -> idx in parcel_idxs, df_ccf.parcellation_index)
-    region_labels = df_ccf[ccf_idxs, :cell_label]
-
-    cell_idxs = tmap(region_labels) do l
-        findfirst(x -> occursin(l, x), df_cell.cell_label)
-    end
-    filter!(!isnothing, cell_idxs)
-    # explicitly cast Int to change from Vector{Union{Int, Nothing}} to Vector{Int} so that indexing adata doesn't error
-    cell_idxs = Int.(cell_idxs) 
-
-    @show length(cell_idxs)
+    region_labels = df_ccf[ccf_idxs, :cell_label] 
 
     expr_mat_file_name = occursin("MERFISH", dataset_name) ? join(split(dataset_name, "-")[2:end], "-") : dataset_name
 
@@ -54,14 +45,23 @@ function get_expression_matrix(dataset_name, region)
     file = join([pyconvert(String, p) for p in file.parts], "/")
 
     adata = readh5ad(file)
-    # HACK: Type conversion is necessary because the original type contains Int32 instead of Int(64)
-    # and some type assertions in Tables fail when converting AnnData to DataFrame.
-    #adata.X = convert(Adjoint{Float64, SparseMatrixCSC{Float64, Int}}, adata.X)
+    if !occursin("imputed", dataset_name)
+        # HACK: Type conversion is necessary because the original type contains Int32 instead of Int(64)
+        # and some type assertions in Tables fail when converting AnnData to DataFrame.
+        adata.X = convert(Adjoint{Float64, SparseMatrixCSC{Float64, Int}}, adata.X)
+    end
+
+    cell_idxs = tmap(region_labels) do l
+        findfirst(x -> occursin(l, x), adata.obs_names)
+    end
 
     df = DataFrame(adata[cell_idxs, :])
-    rename!(df, vcat(["obs"], lowercase.(df_gene.gene_symbol));  makeunique=true)
+    rename!(df, vcat(["cell_label"], lowercase.(df_gene.gene_symbol));  makeunique=true)
 
-    return df
+    dfj = innerjoin(df_cell[:, [:cell_label, :cluster_alias, :x, :y, :z]], df; on=:cell_label)
+    dfj = innerjoin(df_cluster[:, [:cluster_alias, :class]], dfj; on=:cluster_alias)
+
+    return dfj
 end
 
 function get_gene_description(dataset_name, region)
